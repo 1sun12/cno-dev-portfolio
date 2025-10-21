@@ -7,7 +7,9 @@
 #include <netinet/in.h>
 
 int main(void) {
-	a
+	// create sockets
+	int network_socket;
+	network_socket = socket(AF_INET, SOCK_STREAM, 0);
 
 	return EXIT_SUCCESS;
 }
