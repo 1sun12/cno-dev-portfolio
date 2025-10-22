@@ -3,15 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h> // sbrk
-
-// header for every newly allocated block of memory
-// HEAP expands and shrinks in LIFO order; we can't just remove memory at the center
-// so in order to combat this will be storing some helpful information about each block of mem.
-struct header_t {
-	size_t size;
-	unsigned is_free;
-	struct header_t *next;
-};
+#include <pthread.h>
 
 // wrapping the above header in a union 
 // this will align the header on a 16byte address of memory
@@ -23,7 +15,7 @@ union header {
 	struct {
 		size_t size;
 		unsigned is_free;
-		struct header_t *next;
+		union header *next;
 	} s;
 	ALIGN stub;
 };
@@ -36,28 +28,95 @@ header_t *head, *tail;
 // just using a basic global lock; a thread has to acquire this lock first before it can call malloc(custom)
 pthread_mutex_t global_malloc_lock;
 
+// helper function used in malloc() [custom]
+header_t *get_free_block(size_t size) {
+	header_t *curr = head;
+	while(curr) {
+		if (curr->s.is_free && curr->s.size >= size) return curr;
+		curr = curr->s.next;
+	}
+
+	return NULL;
+}
+
 // make allocation to heap (custom)
 void *malloc (size_t size) {
-	// create a pointer to no-address (for now)
-	void *block = NULL;
+	// if size is screwed, just return NULL before starting
+	if (!size) return NULL;
 
-	// using syscall "sbrk", increment the brk pointer in HEAP, see "man 2 sbrk" for more info
-	// brk points to the end of the HEAP
-	// incrementing this pointer results in the allocation of more memory
-	// decrementing has the opposite effect
-	// sbrk(0);  --> gives current address of the program break
-	// sbrk(+x); --> increments brk pointer by +x amount of bytes
-	// sbrk(-x); --> decrements brk pointer by -x amount of bytes (returns (void*) -1 if failure)
-	//
-	// block = [pointer to a newly allocated memory block]
-	block = sbrk(size);
+	// make some variables
+	size_t total_size;
+	void *block;
+	header_t *header;
 
-	// check for failure ? return NULL if allocation did not work : return pointer to our newly alloc. mem.
-	if (block == (void*) -1) {
+	// obtain the mutex lock 
+	pthread_mutex_lock(&global_malloc_lock);
+	
+	// idrk what this does yet, stand-by :')
+	header = get_free_block(size);
+
+	if (header) {
+		header->s.is_free = 0;
+		pthread_mutex_unlock(&global_malloc_lock);
+		return (void*)(header + 1);
+	}
+
+	// calculate total size of our memory block (header + mem. alloc.)
+	total_size = sizeof(header_t) + size;
+
+	// allocate memory! woohoo!
+	block = sbrk(total_size);
+
+	// check to see if the allocation failed
+	if (block == (void*) - 1) {
+		// if it did, return NULL and release lock 
+		pthread_mutex_unlock(&global_malloc_lock);
 		return NULL;
 	}
-	
-	return block;
+
+	// fill our header with useful info about this mem. block 
+	header = (header_t*)block;
+	header->s.size = size;
+	header->s.is_free = 0;
+	header->s.next = NULL;
+
+	if (!head) head = header;
+	if (tail) tail->s.next = header;
+	tail = header;
+	pthread_mutex_unlock(&global_malloc_lock);
+	return (void*)(header + 1);
+}
+
+void free(void *block)
+{
+	header_t *header, *tmp;
+	void *programbreak;
+
+	if (!block)
+		return;
+	pthread_mutex_lock(&global_malloc_lock);
+	header = (header_t*)block - 1;
+
+	programbreak = sbrk(0);
+	if ((char*)block + header->s.size == programbreak) {
+		if (head == tail) {
+			head = tail = NULL;
+		} else {
+			tmp = head;
+			while (tmp) {
+				if(tmp->s.next == tail) {
+					tmp->s.next = NULL;
+					tail = tmp;
+				}
+				tmp = tmp->s.next;
+			}
+		}
+		sbrk(0 - sizeof(header_t) - header->s.size);
+		pthread_mutex_unlock(&global_malloc_lock);
+		return;
+	}
+	header->s.is_free = 1;
+	pthread_mutex_unlock(&global_malloc_lock);
 }
 
 int main(void) {
