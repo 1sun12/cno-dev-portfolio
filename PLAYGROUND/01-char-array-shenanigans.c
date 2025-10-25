@@ -22,6 +22,13 @@ void smake(char *source, char* target) {
 
 	// reallocate new memory equal to the size of our string literal 
 	t_source = (char *)realloc(t_source, sizeof(t_target));
+	while (t_source == NULL) {
+		// if realloc failed, try again
+		printf("realloc failed, attempting again...");
+		t_source = (char *)realloc(t_source, sizeof(t_target));
+	}
+
+	// set original pointer equal to our string literal
 	
 	printf("smake ran successfully!");
 }
