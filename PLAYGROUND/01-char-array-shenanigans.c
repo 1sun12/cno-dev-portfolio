@@ -19,7 +19,9 @@ void smake(char *source, char* target) {
 
 	// size of target in bytes
 	size_t target_size = sizeof(t_target);
-	
+
+	// reallocate new memory equal to the size of our string literal 
+	t_source = (char *)realloc(t_source, sizeof(t_target));
 	
 	printf("smake ran successfully!");
 }
