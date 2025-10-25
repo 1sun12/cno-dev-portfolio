@@ -6,40 +6,24 @@
 
 // takes input ptr, and input string-literal
 // sets pointer = target string literal 
-void smake(char *source, char* target) {
-
-	// if source input is NULL ? set temp source NULL : set temp source as input data
-	char *t_source = source == NULL ? t_source = NULL : t_source = source;
-
-	// if source input is NULL ? set temp target NULL : set temp target as input data
-	char *t_target = target == NULL ? t_target = NULL : t_target = target;
-
-	// size of source in bytes
-	size_t source_size = sizeof(t_source);
-
-	// size of target in bytes
-	size_t target_size = sizeof(t_target);
-
-	// reallocate new memory equal to the size of our string literal 
-	t_source = (char *)realloc(t_source, sizeof(t_target));
-	while (t_source == NULL) {
-		// if realloc failed, try again
-		printf("realloc failed, attempting again...");
-		t_source = (char *)realloc(t_source, sizeof(t_target));
-	}
-
-	// set original pointer equal to our string literal
-	
-	printf("smake ran successfully!");
+void smake(char **source, const char* target) {
+	printf("[DEBUG] source bytes before: %lu\n", strlen(*source));
+	char *temp = (char *)malloc(strlen(target) + 1);
+	strcpy(temp, target);
+	printf("[DEBUG] temp strcpy: %s\n", temp);
+	if (*source != NULL) free(*source);
+	*source = temp;
+	printf("[DEBUG] source bytes after: %lu\n", strlen(*source));
+	puts("[DEBUG] smake ran successfully!");
 }
 
 int main(void) {
 	
-	char *c_str = (char *)calloc(2, sizeof(char));
-	strcpy(c_str, "h");
-	printf("%s", c_str);
-
-	smake(c_str, c_str);
+	char *c_str = (char *)calloc(6, sizeof(char));
+	strcpy(c_str, "hello");
+	printf("[DEBUG] c_str before: %s\n", c_str);
+	smake(&c_str, "hello!hello!hello!hello!");
+	printf("[DEBUG] c_str after: %s\n", c_str);
 
 	return EXIT_SUCCESS;
 }
