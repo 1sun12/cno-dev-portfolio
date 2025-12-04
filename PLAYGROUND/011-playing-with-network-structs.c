@@ -52,6 +52,40 @@ struct addrinfo *servinfo;
 // always remember to empty / zero-out the struct 
 memset(&hints, 0, sizeof hints);
 
+// set to IPv4
+hints.ai_family = AF_INET;
+
+// set to TCP
+hints.ai_socktype = SOCK_STREAM;
+
+// set to local-host
+hints.ai_flags = AI_PASSIVE;
+
+// set protocol to 0 = "any"
+hints.ai_protocol = 0;
+
+// we are now ready for a DNS look-up using getaddrinfo() !!
+// capture the return value of "getaddrinfo" by setting it equal to an int
+int status_getaddrinfo = 0;
+
+status_getaddrinfo = getaddrinfo(
+	NULL, // IP address; not necessary because we set "ai_flags = AI_PASSIVE"; set to local-host
+	"3490", // port number
+	&hints, // required information for the DNS lookup
+	&servinfo // where to store the returned results
+	);
+
+// status == 0 : success!
+// status <= -1 : there was an error
+// status > 0 : there was an error
+if (status_getaddrinfo <= -1) {
+	puts("getaddrinfo: -1 -- (<) there was an error!");
+} else if (status_getaddrinfo == 0){
+	puts("getaddrinfo: 0 -- success!");
+} else if (status_getaddrinfo > 0) {
+	puts("getaddrinfo: >0 -- (>) there was an error!");
+}
+
 puts("=== END OF PROGRAM ===");
 
 return EXIT_SUCCESS;
