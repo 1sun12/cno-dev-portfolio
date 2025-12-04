@@ -9,10 +9,10 @@ CFLAGS = -Wall -g
 SILENCE = --no-print-directory
 
 # SOURCE C FILE
-SOURCE = 01-char-array-shenanigans.c
+SOURCE = 011-playing-with-network-structs.c
 
 # TARGET C FILE
-TARGET = 01-char
+TARGET = run-me
 
 # PRE-REQ
 $(TARGET): $(SOURCE)

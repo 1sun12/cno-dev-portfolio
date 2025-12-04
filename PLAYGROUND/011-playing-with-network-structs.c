@@ -27,3 +27,32 @@
 // struct addrinfo **res -- the results of the DNS look up stored in a linked-list
 // );
 // )
+
+// === EXAMPLE 1 ===
+// below is a sample call if I was a server listening on the local-host IP, for port 3490
+// note, this doesn't actually do any listening or network setup; merely sets up structures we'll use later
+
+// networking includes
+#include <sys/types.h> // not sure WHY this is needed yet...
+#include <sys/socket.h> // not sure WHY this is needed yet...
+#include <netdb.h> // not sure WHY this is needed yet...
+
+// generic includes
+#include <stdlib.h>
+#include <stdio.h>
+#include <cstring> // for "memset()"
+
+int main() {
+// create an addrinfo, to be filled with relevent destination and host information
+struct addrinfo hints;
+
+// create another addrinfo to hold the results of the getaddrinfo() DNS lookup
+struct addrinfo *servinfo;
+
+// always remember to empty / zero-out the struct 
+memset(&hints, 0, sizeof hints);
+
+puts("=== END OF PROGRAM ===");
+
+return EXIT_SUCCESS;
+}
