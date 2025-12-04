@@ -108,9 +108,17 @@ printf("ai_socktype: %d\n", servinfo->ai_socktype);
 printf("ai_protocol: %d\n", servinfo->ai_protocol);
 printf("ai_addrlen: %u\n", servinfo->ai_addrlen);
 printf("ai_addr->sa_family: %u\n", servinfo->ai_addr->sa_family);
+
+// we can't just print "sa_data" out right, because its structured like this: [port/IP]
+// so... we type cast it to a "sockaddr_in", which only contains the IP
+// then we can print it!
+// "0.0.0.0" means that this server is listening on EVERY INTERFACE (accepts connections from anywhere, even local-host)
 char ip_string[INET_ADDRSTRLEN];
-inet_ntop(AF_INET, &(servinfo->ai_addr->sa_data), ip_string, INET_ADDRSTRLEN);
+struct sockaddr_in *ip4 = (struct sockaddr_in *)servinfo->ai_addr;
+inet_ntop(AF_INET, &(ip4->sin_addr), ip_string, INET_ADDRSTRLEN);
 printf("ai_addr->sa_data: %s\n", ip_string);
+
+printf("ai_canonname: %s\n", servinfo->ai_canonname);
 
 puts("=== END OF PROGRAM ===");
 
