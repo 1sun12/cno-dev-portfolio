@@ -36,6 +36,8 @@
 #include <sys/types.h> // not sure WHY this is needed yet...
 #include <sys/socket.h> // not sure WHY this is needed yet...
 #include <netdb.h> // not sure WHY this is needed yet...
+#include <netinet/in.h> // inet_ntop / inet_pton
+#include <arpa/inet.h> // inet_ntop / inet_pton
 
 // generic includes
 #include <stdlib.h>
@@ -106,6 +108,9 @@ printf("ai_socktype: %d\n", servinfo->ai_socktype);
 printf("ai_protocol: %d\n", servinfo->ai_protocol);
 printf("ai_addrlen: %u\n", servinfo->ai_addrlen);
 printf("ai_addr->sa_family: %u\n", servinfo->ai_addr->sa_family);
+char ip_string[INET_ADDRSTRLEN];
+inet_ntop(AF_INET, &(servinfo->ai_addr->sa_data), ip_string, INET_ADDRSTRLEN);
+printf("ai_addr->sa_data: %s\n", ip_string);
 
 puts("=== END OF PROGRAM ===");
 
