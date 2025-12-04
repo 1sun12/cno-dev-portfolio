@@ -105,7 +105,7 @@ printf("ai_family: %d\n", servinfo->ai_family);
 printf("ai_socktype: %d\n", servinfo->ai_socktype);
 printf("ai_protocol: %d\n", servinfo->ai_protocol);
 printf("ai_addrlen: %u\n", servinfo->ai_addrlen);
-
+printf("ai_addr->sa_family: %u\n", servinfo->ai_addr->sa_family);
 
 puts("=== END OF PROGRAM ===");
 
