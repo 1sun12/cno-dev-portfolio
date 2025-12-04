@@ -86,6 +86,27 @@ if (status_getaddrinfo <= -1) {
 	puts("getaddrinfo: >0 -- (>) there was an error!");
 }
 
+// lets print the contents of the first addrinfo in the linked-list, just to see what's inside
+// here is a key of what's normally inside an addrinfo{}
+// struct addrinfo {
+// int ai_flags;		1 -- e.g. AI_PASSIVE, AI_CANONNAME...
+// int ai_family;		2 -- e.g. AF_INET, AF_INET6...
+// int ai_socktype;		3 -- e.g. SOCK_STREAM, SOCK_DGRAM...
+// int ai_protocol;		4 -- 0 for "any"
+// size_t ai_addrlen;		5 -- size of ai_addr in bytes
+// struct sockaddr *ai_addr;	6 -- IP address
+// char *ai_canonname;		7 -- full canonical hostname
+// struct addrinfo *ai_net;	8 -- linked-list, the next addrinfo after the DNS look-up
+// }
+
+puts("=== PRINTING THE FIRST addrinfo IN THE LIST ===");
+printf("ai_flags: %d\n", servinfo->ai_flags);
+printf("ai_family: %d\n", servinfo->ai_family);
+printf("ai_socktype: %d\n", servinfo->ai_socktype);
+printf("ai_protocol: %d\n", servinfo->ai_protocol);
+printf("ai_addrlen: %u\n", servinfo->ai_addrlen);
+
+
 puts("=== END OF PROGRAM ===");
 
 return EXIT_SUCCESS;
