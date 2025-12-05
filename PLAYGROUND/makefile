@@ -9,7 +9,7 @@ CFLAGS = -Wall -g
 SILENCE = --no-print-directory
 
 # SOURCE C FILE
-SOURCE = 011-playing-with-network-structs.c
+SOURCE = 012-playing-with-more-network-structs.c 
 
 # TARGET C FILE
 TARGET = run-me
