@@ -9,7 +9,7 @@ CFLAGS = -Wall -g
 SILENCE = --no-print-directory
 
 # SOURCE C FILE
-SOURCE = 014b-connect-to-server.c
+SOURCE = 12202025-practice.c
 
 # TARGET C FILE
 TARGET = run-me
