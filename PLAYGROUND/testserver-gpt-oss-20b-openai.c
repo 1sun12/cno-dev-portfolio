@@ -10,8 +10,8 @@
  *  Build:
  *      gcc -Wall -Wextra -O2 -o test_http_server test_http_server.c -pthread
  *
- *  Run (root needed for port 80):
- *      sudo ./test_http_server
+ *  Run (no root needed for port 8080):
+ *      ./test_http_server
  */
 
 #define _POSIX_C_SOURCE 200809L   /* For getaddrinfo, pthreads, etc. */
@@ -35,7 +35,7 @@
 /* Configuration constants                                               */
 /* --------------------------------------------------------------------- */
 
-#define LISTEN_PORT     "80"          /* Listen on TCP port 80 */
+#define LISTEN_PORT     "8080"        /* Listen on TCP port 8080 (non-privileged) */
 #define BACKLOG         128           /* Max pending connections */
 #define RECV_BUFFER_LEN 4096          /* Size of request buffer */
 
@@ -144,7 +144,7 @@ int main(void)
 
     /* ---------------------- 1. Resolve address information -------------- */
     memset(&hints, 0, sizeof hints);
-    hints.ai_family   = AF_INET;          /* IPv4 only for simplicity */
+    hints.ai_family   = AF_UNSPEC;         /* IPv4 and IPv6 */
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags    = AI_PASSIVE;       /* For wildcard IP */
 
@@ -191,7 +191,7 @@ int main(void)
         return EXIT_FAILURE;
     }
 
-    log_info("Server is listening on port 80...");
+    log_info("Server is listening on port 8080...");
 
     /* ---------------------- 4. Accept loop ----------------------------- */
     while (1) {
@@ -209,15 +209,26 @@ int main(void)
         }
 
         /* Optional: log the client's IP address */
-        char ipstr[INET_ADDRSTRLEN];
-        struct sockaddr_in *s = (struct sockaddr_in *)&client_addr;
-        inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof ipstr);
+        char ipstr[INET6_ADDRSTRLEN];
+        void *addr;
+        char ipver[32];
+        
+        if (client_addr.ss_family == AF_INET) {
+            struct sockaddr_in *s = (struct sockaddr_in *)&client_addr;
+            addr = &s->sin_addr;
+            strcpy(ipver, "IPv4");
+        } else {
+            struct sockaddr_in6 *s = (struct sockaddr_in6 *)&client_addr;
+            addr = &s->sin6_addr;
+            strcpy(ipver, "IPv6");
+        }
+        inet_ntop(client_addr.ss_family, addr, ipstr, sizeof ipstr);
         fprintf(stdout,
-                "[%s] Accepted connection from %s:%d\n",
-                __func__, ipstr, ntohs(s->sin_port));
+                "[%s] Accepted connection from %s (%s):%d\n",
+                __func__, ipstr, ipver, ntohs(((struct sockaddr_in *)&client_addr)->sin_port));
 
         /* Allocate argument structure for the thread */
-        thread_arg_t *targ = malloc(sizeof(thread_arg_t));
+        thread_arg_t *targ = (thread_arg_t*)malloc(sizeof(thread_arg_t));
         if (!targ) {
             perror("malloc");
             close(client_fd);
